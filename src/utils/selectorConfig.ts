@@ -1,60 +1,54 @@
-import type { PlatformSelectorConfig } from "../types";
+import type { Platform } from "../types";
 
-// Default selectors hardcoded as fallback (updated as of May 2026)
-export const DEFAULT_CONFIG: PlatformSelectorConfig = {
+// Remote selector config — hosted on GitHub Pages
+// Lets us fix broken scrapers same-day without a Chrome Web Store review cycle
+const CDN_URL = "https://nucleus-ext.github.io/config/selectors.json";
+
+export interface SelectorConfig {
+  version: number;
+  lastUpdated: string;
+  platforms: Record<string, PlatformMeta>;
+}
+
+export interface PlatformMeta {
+  lastWorkingDate: string;
+  broken?: boolean;
+  brokenSince?: string;
+}
+
+const DEFAULT_CONFIG: SelectorConfig = {
   version: 1,
+  lastUpdated: "2026-05-15",
   platforms: {
-    claude: {
-      messageContainer: '[data-testid="conversation-turn"]',
-      userMessage:
-        '[data-testid="conversation-turn"][data-is-human="true"] .whitespace-pre-wrap, [data-testid="conversation-turn"] .font-user-message',
-      assistantMessage:
-        '[data-testid="conversation-turn"][data-is-human="false"] .whitespace-pre-wrap, [data-testid="conversation-turn"] .font-claude-message',
-      inputField: '[contenteditable="true"][data-testid="chat-input"], div[contenteditable="true"].ProseMirror',
-      lastWorkingDate: "2026-05-13",
-    },
-    chatgpt: {
-      messageContainer: '[data-message-author-role]',
-      userMessage: '[data-message-author-role="user"] .whitespace-pre-wrap',
-      assistantMessage:
-        '[data-message-author-role="assistant"] .markdown',
-      inputField: '#prompt-textarea',
-      lastWorkingDate: "2026-05-13",
-    },
-    gemini: {
-      messageContainer: ".conversation-container .query-content, .model-response-text",
-      userMessage: ".query-content .query-text",
-      assistantMessage: ".model-response-text p",
-      inputField: '.ql-editor[contenteditable="true"]',
-      lastWorkingDate: "2026-05-13",
-    },
+    claude:  { lastWorkingDate: "2026-05-15" },
+    chatgpt: { lastWorkingDate: "2026-05-15" },
+    gemini:  { lastWorkingDate: "2026-05-15" },
   },
 };
 
-const CDN_URL =
-  "https://raw.githubusercontent.com/nucleus-ext/config/main/selectors.json";
+let cached: SelectorConfig | null = null;
+let cacheTime = 0;
+const TTL = 60 * 60 * 1000; // 1 hour
 
-let cachedConfig: PlatformSelectorConfig | null = null;
-let cacheTimestamp = 0;
-const CACHE_TTL = 60 * 60 * 1000; // 1 hour
-
-export async function getSelectorConfig(): Promise<PlatformSelectorConfig> {
-  const now = Date.now();
-  if (cachedConfig && now - cacheTimestamp < CACHE_TTL) {
-    return cachedConfig;
-  }
-
+export async function getSelectorConfig(): Promise<SelectorConfig> {
+  if (cached && Date.now() - cacheTime < TTL) return cached;
   try {
-    const resp = await fetch(CDN_URL, { cache: "default" });
-    if (resp.ok) {
-      const remote = (await resp.json()) as PlatformSelectorConfig;
-      cachedConfig = remote;
-      cacheTimestamp = now;
-      return remote;
+    const res = await fetch(CDN_URL, { cache: "default" });
+    if (res.ok) {
+      cached = await res.json() as SelectorConfig;
+      cacheTime = Date.now();
+      return cached;
     }
-  } catch {
-    // Network unavailable — fall through to default
-  }
-
+  } catch { /* offline — use defaults */ }
   return DEFAULT_CONFIG;
+}
+
+export function getLastWorkingDate(platform: Platform): string {
+  return cached?.platforms[platform]?.lastWorkingDate
+    ?? DEFAULT_CONFIG.platforms[platform]?.lastWorkingDate
+    ?? "unknown";
+}
+
+export function isPlatformBroken(platform: Platform): boolean {
+  return cached?.platforms[platform]?.broken ?? false;
 }

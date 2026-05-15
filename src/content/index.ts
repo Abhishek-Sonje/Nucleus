@@ -8,12 +8,9 @@ const platform: Platform = detectPlatform(window.location.href);
 
 function scrapeMessages(): { messages: ChatMessage[]; error?: string } {
   switch (platform) {
-    case "claude":
-      return scrapeClaude();
-    case "chatgpt":
-      return scrapeChatGPT();
-    case "gemini":
-      return scrapeGemini();
+    case "claude":  return scrapeClaude();
+    case "chatgpt": return scrapeChatGPT();
+    case "gemini":  return scrapeGemini();
     default:
       return { messages: [], error: "Not on a supported AI platform." };
   }
@@ -38,20 +35,18 @@ function scrapeClaude(): { messages: ChatMessage[]; error?: string } {
   if (!container) {
     return {
       messages: [],
-      error: `Could not find conversation container. data-testid hits: ${document.querySelectorAll("[data-testid]").length}`,
+      error: `Could not find conversation container. data-testid hits: ${document.querySelectorAll('[data-testid]').length}`,
     };
   }
 
   const turns = Array.from(container.children);
   // Last few children are spacers/footer — filter to only content turns
-  const contentTurns = turns.filter((el) => {
+  const contentTurns = turns.filter(el => {
     const text = el.textContent?.trim() ?? "";
-    return (
-      text.length > 0 &&
+    return text.length > 0 &&
       !el.classList.contains("h-px") &&
       !el.classList.contains("h-12") &&
-      !el.classList.contains("print:hidden")
-    );
+      !el.classList.contains("print:hidden");
   });
 
   for (const turn of contentTurns) {
@@ -79,7 +74,9 @@ function scrapeClaude(): { messages: ChatMessage[]; error?: string } {
 
 function findConversationContainer(): Element | null {
   // Primary: the confirmed selector from DOM analysis
-  const primary = document.querySelector("div.flex-1.flex.flex-col.px-4");
+  const primary = document.querySelector(
+    "div.flex-1.flex.flex-col.px-4"
+  );
   if (primary && primary.children.length > 2) return primary;
 
   // Fallback: find a div with many alternating user/non-user children
@@ -131,15 +128,11 @@ function scrapeChatGPT(): { messages: ChatMessage[]; error?: string } {
       turn.querySelector("p") ??
       turn;
     const content = textEl.textContent?.trim() ?? "";
-    if (content.length > 0)
-      messages.push({ role: role as "user" | "assistant", content });
+    if (content.length > 0) messages.push({ role: role as "user" | "assistant", content });
   });
 
   if (messages.length === 0) {
-    return {
-      messages: [],
-      error: "Scraper found 0 messages on ChatGPT. DOM may have changed.",
-    };
+    return { messages: [], error: "Scraper found 0 messages on ChatGPT. DOM may have changed." };
   }
   return { messages };
 }
@@ -149,22 +142,18 @@ function scrapeChatGPT(): { messages: ChatMessage[]; error?: string } {
 function scrapeGemini(): { messages: ChatMessage[]; error?: string } {
   const messages: ChatMessage[] = [];
   const allMsgs = document.querySelectorAll(
-    "user-query, model-response, .user-turn, .model-turn, [class*='user-query'], [class*='model-response']",
+    "user-query, model-response, .user-turn, .model-turn, [class*='user-query'], [class*='model-response']"
   );
   allMsgs.forEach((el) => {
     const tag = el.tagName.toLowerCase();
     const cls = (el.className?.toString() ?? "").toLowerCase();
     const isUser = tag === "user-query" || cls.includes("user");
     const content = el.textContent?.trim() ?? "";
-    if (content.length > 0)
-      messages.push({ role: isUser ? "user" : "assistant", content });
+    if (content.length > 0) messages.push({ role: isUser ? "user" : "assistant", content });
   });
 
   if (messages.length === 0) {
-    return {
-      messages: [],
-      error: "Scraper found 0 messages on Gemini. DOM may have changed.",
-    };
+    return { messages: [], error: "Scraper found 0 messages on Gemini. DOM may have changed." };
   }
   return { messages };
 }
@@ -175,18 +164,13 @@ function scrapeGemini(): { messages: ChatMessage[]; error?: string } {
 // The correct approach: build <p> tags for each line, set innerHTML,
 // then fire Quill's own 'text-change' event so it syncs its Delta model.
 
-function injectIntoQuill(
-  editor: HTMLElement,
-  text: string,
-): { success: boolean; error?: string } {
+function injectIntoQuill(editor: HTMLElement, text: string): { success: boolean; error?: string } {
   try {
     // Convert plain text lines → Quill <p> tags
     // Empty lines become <p><br></p> which is Quill's empty paragraph format
     const html = text
       .split("\n")
-      .map((line) =>
-        line.trim() === "" ? "<p><br></p>" : `<p>${escapeHtml(line)}</p>`,
-      )
+      .map(line => line.trim() === "" ? "<p><br></p>" : `<p>${escapeHtml(line)}</p>`)
       .join("");
 
     // Clear and set content
@@ -205,10 +189,7 @@ function injectIntoQuill(
 
     return { success: true };
   } catch (err) {
-    return {
-      success: false,
-      error: `Quill injection failed: ${(err as Error).message}`,
-    };
+    return { success: false, error: `Quill injection failed: ${(err as Error).message}` };
   }
 }
 
@@ -222,27 +203,22 @@ function escapeHtml(str: string): string {
 
 // ─── Injection ────────────────────────────────────────────────────────────────
 
-async function injectText(
-  text: string,
-): Promise<{ success: boolean; error?: string }> {
+async function injectText(text: string): Promise<{ success: boolean; error?: string }> {
   try {
     // Use confirmed [data-testid="chat-input"] for Claude — it's a ProseMirror contenteditable div
     const inputSelectors: Record<Platform, string[]> = {
-      claude: [
-        '[data-testid="chat-input"]', // confirmed May 2026
+      claude:  [
+        '[data-testid="chat-input"]',          // confirmed May 2026
         'div[contenteditable="true"].ProseMirror',
         'div[contenteditable="true"]',
       ],
       chatgpt: ["#prompt-textarea", 'div[contenteditable="true"]', "textarea"],
-      gemini: [
-        '.ql-editor[contenteditable="true"]',
-        'div[contenteditable="true"]',
-      ],
+      gemini:  ['.ql-editor[contenteditable="true"]', 'div[contenteditable="true"]'],
       unknown: ['div[contenteditable="true"]', "textarea"],
     };
 
     let inputEl: Element | null = null;
-    for (const sel of inputSelectors[platform] ?? inputSelectors.unknown) {
+    for (const sel of (inputSelectors[platform] ?? inputSelectors.unknown)) {
       inputEl = document.querySelector(sel);
       if (inputEl) break;
     }
@@ -257,6 +233,7 @@ async function injectText(
     (inputEl as HTMLElement).focus();
 
     if (inputEl.getAttribute("contenteditable") === "true") {
+
       // Quill editor (Gemini) — must inject as <p> tags, execCommand mangles newlines
       const isQuill = inputEl.classList.contains("ql-editor");
       if (isQuill) {
@@ -272,14 +249,12 @@ async function injectText(
       if (!ok) {
         // Fallback: native InputEvent
         (inputEl as HTMLElement).innerText = text;
-        inputEl.dispatchEvent(
-          new InputEvent("input", {
-            bubbles: true,
-            cancelable: true,
-            inputType: "insertText",
-            data: text,
-          }),
-        );
+        inputEl.dispatchEvent(new InputEvent("input", {
+          bubbles: true,
+          cancelable: true,
+          inputType: "insertText",
+          data: text,
+        }));
       }
 
       inputEl.dispatchEvent(new Event("input", { bubbles: true }));
@@ -290,65 +265,48 @@ async function injectText(
     if (inputEl.tagName === "TEXTAREA") {
       const ta = inputEl as HTMLTextAreaElement;
       const setter = Object.getOwnPropertyDescriptor(
-        window.HTMLTextAreaElement.prototype,
-        "value",
+        window.HTMLTextAreaElement.prototype, "value"
       )?.set;
       setter?.call(ta, text);
       ta.dispatchEvent(new Event("input", { bubbles: true }));
       return { success: true };
     }
 
-    return {
-      success: false,
-      error: `Unsupported input type: ${inputEl.tagName}`,
-    };
+    return { success: false, error: `Unsupported input type: ${inputEl.tagName}` };
   } catch (err) {
-    return {
-      success: false,
-      error: `Injection failed: ${(err as Error).message}`,
-    };
+    return { success: false, error: `Injection failed: ${(err as Error).message}` };
   }
 }
 
 // ─── Message Listener ─────────────────────────────────────────────────────────
 
-chrome.runtime.onMessage.addListener(
-  (message: ExtensionMessage, _sender, sendResponse) => {
-    if (message.type === "GET_PLATFORM") {
-      sendResponse({ type: "PLATFORM_RESULT", platform });
-      return false;
-    }
-
-    if (message.type === "CAPTURE_CHAT") {
-      const result = scrapeMessages(); // fully sync — no await, no race
-      sendResponse({
-        type: "SCRAPE_RESULT",
-        messages: result.messages,
-        error: result.error,
-      });
-      return false;
-    }
-
-    if (message.type === "INJECT_PILL") {
-      const { pill, mode } = message;
-      const text = buildInjectionBlock(pill.messages, mode, {
-        title: pill.title,
-        platform: pill.platform,
-        capturedAt: pill.capturedAt,
-      });
-      injectText(text).then((result) => {
-        sendResponse({
-          type: "INJECT_RESULT",
-          success: result.success,
-          error: result.error,
-        });
-      });
-      return true; // async
-    }
-
+chrome.runtime.onMessage.addListener((message: ExtensionMessage, _sender, sendResponse) => {
+  if (message.type === "GET_PLATFORM") {
+    sendResponse({ type: "PLATFORM_RESULT", platform });
     return false;
-  },
-);
+  }
+
+  if (message.type === "CAPTURE_CHAT") {
+    const result = scrapeMessages(); // fully sync — no await, no race
+    sendResponse({ type: "SCRAPE_RESULT", messages: result.messages, error: result.error });
+    return false;
+  }
+
+  if (message.type === "INJECT_PILL") {
+    const { pill, mode } = message;
+    const text = buildInjectionBlock(pill.messages, mode, {
+      title: pill.title,
+      platform: pill.platform,
+      capturedAt: pill.capturedAt,
+    });
+    injectText(text).then((result) => {
+      sendResponse({ type: "INJECT_RESULT", success: result.success, error: result.error });
+    });
+    return true; // async
+  }
+
+  return false;
+});
 
 // ─── Debug helper ─────────────────────────────────────────────────────────────
 
@@ -357,32 +315,18 @@ chrome.runtime.onMessage.addListener(
   console.log("Platform:", platform);
 
   const container = findConversationContainer();
-  console.log(
-    "Container found:",
-    !!container,
-    "| children:",
-    container?.children?.length,
-  );
+  console.log("Container found:", !!container, "| children:", container?.children?.length);
 
   const result = scrapeMessages();
   console.log("Messages scraped:", result.messages.length);
   if (result.error) console.warn("Error:", result.error);
-  console.table(
-    result.messages.map((m) => ({
-      role: m.role,
-      preview: m.content.slice(0, 100),
-    })),
-  );
+  console.table(result.messages.map(m => ({
+    role: m.role,
+    preview: m.content.slice(0, 100),
+  })));
 
   const input = document.querySelector('[data-testid="chat-input"]');
-  console.log(
-    "Input found:",
-    !!input,
-    "| tag:",
-    input?.tagName,
-    "| contenteditable:",
-    input?.getAttribute("contenteditable"),
-  );
+  console.log("Input found:", !!input, "| tag:", input?.tagName, "| contenteditable:", input?.getAttribute("contenteditable"));
 
   console.groupEnd();
   return result;
