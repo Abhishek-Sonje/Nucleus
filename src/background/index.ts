@@ -92,7 +92,20 @@ chrome.commands.onCommand.addListener(async (command) => {
   if (command !== "capture-chat") return;
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id || !tab.url) return;
-  await captureChat(tab.id, tab.url);
+  const result = await captureChat(tab.id, tab.url);
+
+  if (result.success) {
+    // Set a flag so popup can show a confirmation toast next time it opens
+    await chrome.storage.local.set({ nucleus_shortcut_fired: true });
+    // Also flash a badge on the extension icon for immediate feedback
+    await chrome.action.setBadgeText({ text: "✓" });
+    await chrome.action.setBadgeBackgroundColor({ color: "#4ade80" });
+    setTimeout(() => chrome.action.setBadgeText({ text: "" }), 2500);
+  } else {
+    await chrome.action.setBadgeText({ text: "!" });
+    await chrome.action.setBadgeBackgroundColor({ color: "#ff4444" });
+    setTimeout(() => chrome.action.setBadgeText({ text: "" }), 2500);
+  }
 });
 
 // ─── Message listener (from popup) ───────────────────────────────────────────

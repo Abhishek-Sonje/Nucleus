@@ -654,3 +654,222 @@ html, body {
   50%      { opacity: 0.4; }
 }
 .pulse { animation: pulse 1.2s ease-in-out infinite; }
+
+/* ══ Onboarding ══════════════════════════════════════════════════════════════ */
+
+#onboarding-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 480px;
+  max-height: 580px;
+  overflow: hidden;
+}
+
+#onboarding-view.hidden { display: none; }
+
+.ob-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px 9px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.ob-hero {
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.ob-tagline {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 5px;
+  line-height: 1.3;
+}
+
+.ob-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.ob-steps {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  flex: 1;
+}
+
+.ob-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  transition: background 0.2s;
+}
+
+.ob-step.active {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+}
+
+.ob-step.done {
+  background: rgba(74,222,128,0.06);
+  border-color: rgba(74,222,128,0.18);
+}
+
+.ob-step-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.ob-step.active .ob-step-icon {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+.ob-step.done .ob-step-icon {
+  background: rgba(74,222,128,0.1);
+  border-color: rgba(74,222,128,0.25);
+  color: var(--success);
+}
+
+.ob-step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 5px;
+}
+
+.ob-step-text strong {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.ob-step.active .ob-step-text strong { color: var(--accent); }
+.ob-step.done .ob-step-text strong   { color: var(--success); }
+
+.ob-step-text span {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.ob-step-arrow {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 10px;
+  padding: 2px 0 2px 15px;
+  line-height: 1;
+}
+
+.ob-cta-area {
+  padding: 10px 14px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+}
+
+.ob-platform-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  text-align: center;
+  width: 100%;
+  letter-spacing: 0.02em;
+}
+.ob-platform-hint.ok {
+  color: var(--success);
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.2);
+}
+.ob-platform-hint.no {
+  color: var(--text-muted);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+}
+
+.ob-capture-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: var(--accent);
+  color: #0d0d0f;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.ob-capture-btn:hover:not(:disabled) { opacity: 0.85; }
+.ob-capture-btn:active:not(:disabled) { transform: scale(0.98); }
+.ob-capture-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.ob-shortcut-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  background: var(--bg-3);
+  border: 1px solid var(--border-bright);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--text);
+}
+
+/* ══ Shortcut toast (shown in main view after keyboard capture) ════════════ */
+
+.shortcut-toast {
+  margin: 0 14px 4px;
+  padding: 7px 10px;
+  background: rgba(74,222,128,0.08);
+  border: 1px solid rgba(74,222,128,0.2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--success);
+  letter-spacing: 0.02em;
+  animation: fadeInDown 0.2s ease;
+  flex-shrink: 0;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

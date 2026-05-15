@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nucleus — Privacy Policy</title>
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --bg-2: #141416;
+      --border: #2a2a30;
+      --accent: #e8ff47;
+      --text: #f0f0f2;
+      --text-muted: #6b6b78;
+      --font-mono: "Space Mono", monospace;
+      --font-sans: "DM Sans", -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+    }
+
+    .logo-text {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text);
+    }
+
+    .version {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    main {
+      padding: 48px 0 80px;
+    }
+
+    h1 {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+
+    .updated {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-bottom: 40px;
+    }
+
+    .tldr {
+      background: #141416;
+      border: 1px solid #2a2a30;
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 40px;
+    }
+
+    .tldr p {
+      font-size: 14px;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    h2 {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin: 36px 0 12px;
+    }
+
+    p { color: #c8c8d0; margin-bottom: 14px; }
+
+    ul {
+      list-style: none;
+      margin-bottom: 14px;
+    }
+
+    ul li {
+      color: #c8c8d0;
+      padding: 4px 0 4px 18px;
+      position: relative;
+    }
+
+    ul li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 12px;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .contact-box {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 20px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 40px;
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a class="logo" href="#">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="3" fill="#e8ff47" />
+          <circle cx="10" cy="10" r="6" stroke="#e8ff47" stroke-width="1.5" stroke-dasharray="2 2" opacity="0.6"/>
+          <circle cx="10" cy="10" r="9" stroke="#e8ff47" stroke-width="1" opacity="0.3"/>
+        </svg>
+        <span class="logo-text">nucleus</span>
+        <span class="version">v1.0</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <h1>Privacy Policy</h1>
+      <div class="updated">Last updated: May 2026</div>
+
+      <div class="tldr">
+        <p>TL;DR — Nucleus collects nothing. Zero data ever leaves your browser. There are no servers, no accounts, no analytics, no tracking of any kind.</p>
+      </div>
+
+      <h2>What data Nucleus accesses</h2>
+      <p>Nucleus reads AI chat conversations from the active browser tab when you explicitly click "Capture Chat" or press the keyboard shortcut. It reads only the message content visible on the page.</p>
+
+      <h2>How data is stored</h2>
+      <p>All captured data is stored exclusively in <strong>chrome.storage.local</strong> — a sandboxed storage area inside your browser that is:</p>
+      <ul>
+        <li>Only accessible to the Nucleus extension itself</li>
+        <li>Never synced to Google servers or any cloud service</li>
+        <li>Never shared with any third party</li>
+        <li>Deleted permanently when you uninstall the extension</li>
+      </ul>
+
+      <h2>Data transmission</h2>
+      <p>Nucleus makes <strong>no network requests</strong> to any server, API, or external service. The only optional network call is fetching a selector configuration JSON from a CDN to keep platform scrapers up to date. This request contains no user data whatsoever — only the extension version is sent as a standard browser User-Agent header.</p>
+
+      <h2>Permissions explained</h2>
+      <ul>
+        <li><strong>storage</strong> — to save captured pills to local browser storage</li>
+        <li><strong>activeTab</strong> — to read the current tab's URL to detect which AI platform you're on</li>
+        <li><strong>scripting</strong> — to inject the content script into AI chat tabs so messages can be read</li>
+        <li><strong>host permissions</strong> (claude.ai, chatgpt.com, gemini.google.com) — required for the content script to run on those pages</li>
+      </ul>
+      <p>No permission is used beyond its stated purpose above.</p>
+
+      <h2>Third parties</h2>
+      <p>Nucleus does not integrate with, send data to, or receive data from any third party. There are no analytics SDKs, no crash reporters, no ad networks.</p>
+
+      <h2>Children's privacy</h2>
+      <p>Nucleus does not collect any personal information from anyone, including children. The extension has no accounts, sign-ups, or data collection of any kind.</p>
+
+      <h2>Changes to this policy</h2>
+      <p>If this policy changes, the updated version will be published at this URL with a new "Last updated" date. Continued use of the extension after a policy update constitutes acceptance of the updated policy.</p>
+
+      <div class="contact-box">
+        Questions? Open an issue on GitHub or contact the developer directly via the Chrome Web Store listing page.
+      </div>
+    </div>
+  </main>
+</body>
+</html>

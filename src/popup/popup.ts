@@ -12,6 +12,7 @@ let activePill: Pill | null = null;
 let currentPlatform: Platform = "unknown";
 let currentTabId: number | null = null;
 let sortOrder: "newest" | "oldest" = "newest";
+let onboardingActive = false;
 
 // ─── DOM refs ─────────────────────────────────────────────────────────────────
 
@@ -39,6 +40,13 @@ const injectStatus   = document.getElementById("inject-status")!;
 const colorSwatches  = document.getElementById("color-swatches")!;
 const exportBtn      = document.getElementById("export-btn")!;
 
+// Onboarding refs
+const onboardingView  = document.getElementById("onboarding-view")!;
+const mainApp         = document.getElementById("app")!;
+const obPlatformHint  = document.getElementById("ob-platform-hint")!;
+const obCaptureBtn    = document.getElementById("ob-capture-btn") as HTMLButtonElement;
+const obPlatformBadge = document.getElementById("ob-platform-badge")!;
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
 async function init() {
@@ -47,6 +55,69 @@ async function init() {
   await loadStorageQuota();
   renderPlatformBadge();
   setupEventListeners();
+
+  // Decide: show onboarding or main view
+  const hasSeenOnboarding = await getHasSeenOnboarding();
+  if (!hasSeenOnboarding && pills.length === 0) {
+    showOnboarding();
+  } else {
+    showMainView();
+  }
+
+  // Shortcut toast — background sets a flag after keyboard capture
+  checkShortcutToast();
+}
+
+async function getHasSeenOnboarding(): Promise<boolean> {
+  const result = await chrome.storage.local.get("nucleus_onboarded");
+  return !!result.nucleus_onboarded;
+}
+
+async function markOnboarded() {
+  await chrome.storage.local.set({ nucleus_onboarded: true });
+}
+
+function showOnboarding() {
+  onboardingActive = true;
+  mainApp.style.display = "none";
+  onboardingView.classList.remove("hidden");
+
+  // Mirror platform state into onboarding
+  if (currentPlatform !== "unknown") {
+    const broken = isPlatformBroken(currentPlatform);
+    const color = broken ? "var(--warn)" : platformColor(currentPlatform);
+    obPlatformBadge.textContent = platformDisplayName(currentPlatform) + (broken ? " ⚠" : "");
+    obPlatformBadge.style.cssText = `color:${color};border-color:${color}40;background:${color}15;display:inline-block`;
+
+    if (!broken) {
+      obPlatformHint.textContent = `✓ ${platformDisplayName(currentPlatform)} detected — ready to capture`;
+      obPlatformHint.className = "ob-platform-hint ok";
+      obCaptureBtn.disabled = false;
+    } else {
+      obCaptureBtn.disabled = true;
+    }
+  }
+}
+
+function showMainView() {
+  onboardingActive = false;
+  onboardingView.classList.add("hidden");
+  mainApp.style.display = "";
+}
+
+// Shortcut toast: background writes a flag to storage after keyboard capture
+async function checkShortcutToast() {
+  const result = await chrome.storage.local.get("nucleus_shortcut_fired");
+  if (!result.nucleus_shortcut_fired) return;
+  // Clear the flag
+  await chrome.storage.local.remove("nucleus_shortcut_fired");
+  // Show toast in main view
+  const toast = document.createElement("div");
+  toast.className = "shortcut-toast";
+  toast.textContent = "⌨ Alt+Shift+C — chat captured!";
+  const searchBar = document.querySelector(".search-bar");
+  if (searchBar) searchBar.before(toast);
+  setTimeout(() => toast.remove(), 3500);
 }
 
 async function loadCurrentTab() {
@@ -227,6 +298,42 @@ function startTitleEdit(pillId: string) {
 
 function setupEventListeners() {
   captureBtn.addEventListener("click", handleCapture);
+
+  // Onboarding capture button — same action
+  obCaptureBtn.addEventListener("click", async () => {
+    obCaptureBtn.disabled = true;
+    obCaptureBtn.textContent = "Capturing...";
+    try {
+      const result = await chrome.runtime.sendMessage({ type: "CAPTURE_REQUEST" });
+      if (result?.success) {
+        pills.unshift(result.pill);
+        await markOnboarded();
+        showMainView();
+        await loadPills();
+        await loadStorageQuota();
+        renderPlatformBadge();
+        // Show brief success toast
+        const toast = document.createElement("div");
+        toast.className = "shortcut-toast";
+        toast.textContent = `✓ "${trunc(result.pill.title, 30)}" captured`;
+        const searchBar = document.querySelector(".search-bar");
+        if (searchBar) searchBar.before(toast);
+        setTimeout(() => toast.remove(), 3000);
+      } else {
+        obCaptureBtn.textContent = result?.error ?? "Capture failed";
+        setTimeout(() => {
+          obCaptureBtn.textContent = "Capture Chat";
+          obCaptureBtn.disabled = false;
+        }, 2500);
+      }
+    } catch {
+      obCaptureBtn.textContent = "Error — retry";
+      setTimeout(() => {
+        obCaptureBtn.textContent = "Capture Chat";
+        obCaptureBtn.disabled = false;
+      }, 2000);
+    }
+  });
 
   sortBtn.addEventListener("click", () => {
     sortOrder = sortOrder === "newest" ? "oldest" : "newest";
