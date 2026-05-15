@@ -1,0 +1,16 @@
+{
+  "name": "nucleus",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite build --watch & vite build --mode content --watch",
+    "build": "tsc && vite build && vite build --mode content && node scripts/postbuild.js",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.42",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.12"
+  }
+}

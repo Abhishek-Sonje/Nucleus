@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nucleus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="header">
+        <div class="logo">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="3" fill="var(--accent)" />
+            <circle cx="10" cy="10" r="6" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="2 2" opacity="0.6"/>
+            <circle cx="10" cy="10" r="9" stroke="var(--accent)" stroke-width="1" opacity="0.3"/>
+          </svg>
+          <span class="logo-text">nucleus</span>
+        </div>
+        <div id="platform-badge" class="platform-badge"></div>
+      </header>
+
+      <div class="capture-bar">
+        <button id="capture-btn" class="capture-btn">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="7" cy="7" r="2.5" fill="currentColor"/>
+          </svg>
+          <span id="capture-btn-label">Capture Chat</span>
+        </button>
+      </div>
+
+      <div id="progress-panel" class="progress-panel hidden">
+        <div class="progress-steps">
+          <div class="progress-step" id="step-1">
+            <div class="step-dot"></div>
+            <span class="step-label">Reaching page</span>
+          </div>
+          <div class="progress-step" id="step-2">
+            <div class="step-dot"></div>
+            <span class="step-label">Scraping DOM</span>
+          </div>
+          <div class="progress-step" id="step-3">
+            <div class="step-dot"></div>
+            <span class="step-label">Saving pill</span>
+          </div>
+        </div>
+        <div class="progress-track">
+          <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        <div id="capture-status" class="capture-status"></div>
+      </div>
+
+      <div class="search-bar">
+        <svg class="search-icon" width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <circle cx="5.5" cy="5.5" r="4" stroke="var(--text-muted)" stroke-width="1.5"/>
+          <path d="M9 9L11.5 11.5" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <input id="search-input" class="search-input" type="text" placeholder="Search pills..." />
+      </div>
+
+      <div id="pills-container" class="pills-container">
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-icon">◎</div>
+          <p>No pills yet.<br/>Capture a chat to start.</p>
+        </div>
+        <ul id="pills-list" class="pills-list"></ul>
+      </div>
+
+      <footer class="footer">
+        <div class="storage-bar-wrap">
+          <div class="storage-label">
+            <span id="storage-text">— / 10MB</span>
+          </div>
+          <div class="storage-track-footer">
+            <div id="storage-fill" class="storage-fill-footer" style="width: 0%"></div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <div id="inject-modal" class="modal hidden">
+      <div class="modal-inner">
+        <div class="modal-header">
+          <span id="modal-title" class="modal-title"></span>
+          <button id="modal-close" class="modal-close">✕</button>
+        </div>
+        <p class="modal-hint">Choose injection mode:</p>
+        <div class="modal-modes">
+          <button class="mode-btn" data-mode="summary">
+            <strong>Summary</strong>
+            <span>Compressed key points</span>
+          </button>
+          <button class="mode-btn" data-mode="recent">
+            <strong>Recent</strong>
+            <span>Last 6 messages</span>
+          </button>
+          <button class="mode-btn" data-mode="full">
+            <strong>Full</strong>
+            <span>Complete transcript</span>
+          </button>
+        </div>
+        <div id="inject-status" class="inject-status"></div>
+      </div>
+    </div>
+
+    <script type="module" src="popup.ts"></script>
+  </body>
+</html>
